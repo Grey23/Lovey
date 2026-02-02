@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --shadow: 0 16px 40px rgba(17, 24, 39, 0.12);
+            --ring: rgba(236, 72, 153, 0.20);
+            --pink: #ec4899;
+            --rose: #fb7185;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 600px at 50% -10%, rgba(236, 72, 153, 0.10), transparent 60%),
+                radial-gradient(900px 500px at 20% 10%, rgba(251, 113, 133, 0.10), transparent 55%),
+                var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .wrap {
+            position: relative;
+            padding: 56px 18px 72px;
+            display: grid;
+            place-items: center;
+        }
+
+        .panel {
+            width: min(1060px, 100%);
+            background: rgba(255, 255, 255, 0.70);
+            border: 1px solid rgba(17, 24, 39, 0.06);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            padding: 32px 22px 28px;
+        }
+
+        header {
+            display: grid;
+            gap: 10px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(26px, 4vw, 40px);
+            letter-spacing: -0.02em;
+        }
+
+        .sub {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .cards {
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(160px, 1fr));
+            gap: 14px;
+        }
+
+        @media (max-width: 980px) {
+            .cards { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .wrap { padding: 44px 14px 64px; }
+            .panel { padding: 26px 16px 22px; }
+            .cards { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+        }
+
+        .card {
+            position: relative;
+            height: 220px;
+            border-radius: 18px;
+            perspective: 1000px;
+            outline: none;
+        }
+
+        .card button {
+            all: unset;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+        }
+
+        .card button:focus-visible {
+            box-shadow: 0 0 0 4px var(--ring);
+        }
+
+        .inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 700ms cubic-bezier(0.2, 0.9, 0.2, 1);
+        }
+
+        .card[data-flipped="true"] .inner {
+            transform: rotateY(180deg);
+        }
+
+        .face {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            backface-visibility: hidden;
+            overflow: hidden;
+        }
+
+        .front {
+            background: #fff;
+            border: 1px solid rgba(17, 24, 39, 0.08);
+        }
+
+        .photo {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: saturate(1.05) contrast(1.02);
+        }
+
+        .front::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(17, 24, 39, 0.55), rgba(17, 24, 39, 0.00) 56%);
+        }
+
+        .tap {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 12px;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            backdrop-filter: blur(8px);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, rgba(255, 255, 255, 0.2) 35%, rgba(255, 255, 255, 0) 70%),
+                linear-gradient(135deg, var(--pink), var(--rose));
+            box-shadow: 0 10px 18px rgba(236, 72, 153, 0.40);
+        }
+
+        .back {
+            background: linear-gradient(145deg, rgba(236, 72, 153, 0.16), rgba(251, 113, 133, 0.10)),
+                rgba(255, 255, 255, 0.90);
+            border: 1px solid rgba(236, 72, 153, 0.18);
+            transform: rotateY(180deg);
+            display: grid;
+            place-items: center;
+            padding: 16px;
+        }
+
+        .letters {
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: 0.10em;
+            font-size: clamp(16px, 2.2vw, 22px);
+            color: #be185d;
+        }
+
+        .letters span {
+            display: inline-block;
+            padding: 0 2px;
+        }
+
+        .assembled {
+            margin-top: 14px;
+            display: grid;
+            justify-items: center;
+            gap: 6px;
+            text-align: center;
+        }
+
+        .assembledLine {
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: -0.01em;
+            font-size: clamp(18px, 2.6vw, 28px);
+            color: #9d174d;
+        }
+
+        .reveal {
+            margin-top: 22px;
+            border-top: 1px dashed rgba(17, 24, 39, 0.12);
+            padding-top: 18px;
+            display: none;
+            gap: 12px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .reveal[data-show="true"] {
+            display: grid;
+        }
+
+        .big {
+            font-size: clamp(22px, 3.2vw, 34px);
+            font-weight: 900;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+
+        .dateRow {
+            display: grid;
+            gap: 10px;
+            width: min(520px, 100%);
+            justify-items: center;
+        }
+
+        .dateRow input {
+            width: min(360px, 100%);
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(17, 24, 39, 0.14);
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 22px rgba(17, 24, 39, 0.06);
+            font-size: 14px;
+        }
+
+        .cta {
+            width: min(360px, 100%);
+            display: grid;
+            grid-auto-flow: column;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            cursor: pointer;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .btnPrimary {
+            color: white;
+            background: linear-gradient(135deg, var(--pink), var(--rose));
+            box-shadow: 0 14px 26px rgba(236, 72, 153, 0.28);
+        }
+
+        .btnGhost {
+            color: #9d174d;
+            background: rgba(236, 72, 153, 0.10);
+            border: 1px solid rgba(236, 72, 153, 0.20);
+        }
+
+        .hearts {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .heart {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            transform: rotate(45deg);
+            opacity: 0.22;
+            animation: floatUp linear infinite;
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(251, 113, 133, 0.85));
+            filter: drop-shadow(0 10px 10px rgba(236, 72, 153, 0.18));
+        }
+
+        .heart::before,
+        .heart::after {
+            content: "";
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: inherit;
+        }
+
+        .heart::before { left: -7px; }
+        .heart::after { top: -7px; }
+
+        .app {
+            width: 100%;
+        }
+
+        .app[data-enabled="false"] {
+            pointer-events: none;
+            user-select: none;
+            filter: blur(2px);
+            opacity: 0.25;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            padding: 18px;
+        }
+
+        .overlay[data-open="true"] {
+            display: grid;
+        }
+
+        .modal {
+            width: min(560px, 100%);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(17, 24, 39, 0.08);
+            border-radius: 22px;
+            box-shadow: 0 20px 50px rgba(17, 24, 39, 0.16);
+            padding: 22px 18px 18px;
+            text-align: center;
+        }
+
+        .modalTitle {
+            margin: 0;
+            font-weight: 900;
+            font-size: clamp(18px, 2.8vw, 26px);
+            color: #111827;
+            letter-spacing: -0.01em;
+        }
+
+        .angry {
+            margin-top: 10px;
+            min-height: 30px;
+            font-size: 22px;
+            letter-spacing: 2px;
+            color: #9d174d;
+            word-break: break-word;
+        }
+
+        .modalButtons {
+            margin-top: 14px;
+            display: grid;
+            grid-auto-flow: column;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        @keyframes floatUp {
+            from { transform: translateY(110vh) rotate(45deg) translateX(0); }
+            to { transform: translateY(-20vh) rotate(45deg) translateX(var(--drift, 0px)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" aria-hidden="true" id="hearts"></div>
+
+    <div class="overlay" id="overlay" data-open="true" aria-modal="true" role="dialog" aria-label="Question dialog">
+        <div class="modal">
+            <p class="modalTitle">Hi im about to show you something special, now if you are interested click next.</p>
+            <div class="angry" id="angry" aria-live="polite"></div>
+            <div class="modalButtons">
+                <button class="btn btnPrimary" type="button" id="nextBtn">Next</button>
+                <button class="btn btnGhost" type="button" id="noBtn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="wrap app" id="app" data-enabled="false" aria-hidden="true">
+        <section class="panel" aria-label="Valentine card flip">
+            <header>
+                <h1>Tap each photo card</h1>
+                <p class="sub">Each flip reveals the message piece by piece.</p>
+            </header>
+
+            <div class="assembled" aria-label="Assembled message">
+                <p class="assembledLine" id="assembled">&nbsp;</p>
+                <p class="sub">Flip the cards in order to complete the sentence.</p>
+            </div>
+
+            <div class="cards">
+                <div class="card" data-index="0" data-flipped="false">
+                    <button type="button" aria-label="Flip card 1">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 1.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>1/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="card" data-index="1" data-flipped="false">
+                    <button type="button" aria-label="Flip card 2">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 2.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>2/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="card" data-index="2" data-flipped="false">
+                    <button type="button" aria-label="Flip card 3">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 3.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>3/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="card" data-index="3" data-flipped="false">
+                    <button type="button" aria-label="Flip card 4">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 4.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>4/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="card" data-index="4" data-flipped="false">
+                    <button type="button" aria-label="Flip card 5">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 5.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>5/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="card" data-index="5" data-flipped="false">
+                    <button type="button" aria-label="Flip card 6">
+                        <div class="inner">
+                            <div class="face front">
+                                <div class="photo" style="background-image: url('img/love 6.jpg')"></div>
+                                <div class="tap">
+                                    <span class="badge"><span class="dot"></span>click to flip</span>
+                                    <span>6/6</span>
+                                </div>
+                            </div>
+                            <div class="face back">
+                                <div class="letters" aria-label="Word">?</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="reveal" id="reveal" data-show="false">
+                <p class="big">Will you be my Valentine date! I LOVE YOU!! ❤️</p>
+                <p> by: Ranniel ❤️</p>
+                <div class="dateRow">
+                    <p class="sub" id="status" role="status" aria-live="polite"></p>
+                    <div class="cta">
+                        <button class="btn btnGhost" type="button" id="resetBtn">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const hearts = document.getElementById('hearts');
+            const overlay = document.getElementById('overlay');
+            const app = document.getElementById('app');
+            const nextBtn = document.getElementById('nextBtn');
+            const noBtn = document.getElementById('noBtn');
+            const angry = document.getElementById('angry');
+            const cards = Array.from(document.querySelectorAll('.card'));
+            const reveal = document.getElementById('reveal');
+            const assembled = document.getElementById('assembled');
+            const resetBtn = document.getElementById('resetBtn');
+            const status = document.getElementById('status');
+
+            const words = ['WILL', 'YOU', 'BE', 'MY', 'VALENTINE', 'DATE!'];
+            let modalOpen = true;
+            let noCount = 0;
+
+            function shuffle(arr) {
+                const a = arr.slice();
+                for (let i = a.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const tmp = a[i];
+                    a[i] = a[j];
+                    a[j] = tmp;
+                }
+                return a;
+            }
+
+            function initCards() {
+                const shuffled = shuffle(words);
+                cards
+                    .slice()
+                    .sort((a, b) => Number(a.getAttribute('data-index')) - Number(b.getAttribute('data-index')))
+                    .forEach((cardEl, i) => {
+                        cardEl.setAttribute('data-word', shuffled[i]);
+                        const letterEl = cardEl.querySelector('.letters');
+                        if (letterEl) {
+                            letterEl.textContent = shuffled[i];
+                            letterEl.setAttribute('aria-label', shuffled[i]);
+                        }
+                    });
+            }
+
+            function seedHearts() {
+                const count = 18;
+                const widths = [10, 12, 14, 16, 18];
+
+                for (let i = 0; i < count; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'heart';
+
+                    const size = widths[Math.floor(Math.random() * widths.length)];
+                    const left = Math.random() * 100;
+                    const duration = 9 + Math.random() * 10;
+                    const delay = -Math.random() * duration;
+                    const drift = (Math.random() - 0.5) * 120;
+                    const opacity = 0.12 + Math.random() * 0.22;
+
+                    el.style.width = size + 'px';
+                    el.style.height = size + 'px';
+                    el.style.left = left + 'vw';
+                    el.style.animationDuration = duration + 's';
+                    el.style.animationDelay = delay + 's';
+                    el.style.setProperty('--drift', drift + 'px');
+                    el.style.opacity = String(opacity);
+
+                    hearts.appendChild(el);
+                }
+            }
+
+            function updateReveal() {
+                const revealed = new Set(
+                    cards
+                        .filter((c) => c.getAttribute('data-flipped') === 'true')
+                        .map((c) => c.getAttribute('data-word'))
+                        .filter(Boolean)
+                );
+
+                const built = words.map((w) => (revealed.has(w) ? w : '____'));
+                assembled.textContent = built.join(' ');
+
+                const allFlipped = revealed.size === words.length;
+                reveal.setAttribute('data-show', allFlipped ? 'true' : 'false');
+
+                if (allFlipped) {
+                    status.textContent = 'See you on Feb 14, 2026.';
+                } else {
+                    status.textContent = '';
+                }
+            }
+
+            function flip(cardEl) {
+                if (modalOpen) return;
+                const flipped = cardEl.getAttribute('data-flipped') === 'true';
+                cardEl.setAttribute('data-flipped', flipped ? 'false' : 'true');
+                updateReveal();
+            }
+
+            cards.forEach((cardEl) => {
+                const btn = cardEl.querySelector('button');
+                btn.addEventListener('click', () => flip(cardEl));
+            });
+
+            resetBtn.addEventListener('click', () => {
+                cards.forEach((c) => c.setAttribute('data-flipped', 'false'));
+                status.textContent = '';
+                updateReveal();
+            });
+
+            function setModal(open) {
+                modalOpen = open;
+                overlay.setAttribute('data-open', open ? 'true' : 'false');
+                app.setAttribute('data-enabled', open ? 'false' : 'true');
+                app.setAttribute('aria-hidden', open ? 'true' : 'false');
+                document.body.style.overflow = open ? 'hidden' : '';
+            }
+
+            nextBtn.addEventListener('click', () => {
+                setModal(false);
+            });
+
+            noBtn.addEventListener('click', () => {
+                noCount += 1;
+                const shown = Math.min(noCount, 24);
+                angry.textContent = '😠'.repeat(shown);
+            });
+
+            seedHearts();
+            initCards();
+            updateReveal();
+            setModal(true);
+        })();
+    </script>
+</body>
+</html>
